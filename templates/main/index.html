@@ -1,0 +1,152 @@
+{% extends 'base.html' %} {% load static %} {% block title %} Your Weather {% endblock title%} {% block content %}   
+<!-- Modal -->
+<div class="modal fade" id="resultsModal" tabindex="-1" aria-labelledby="resultsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="resultsModalLabel">Your forecast for {{forecast.location}}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="alert-box">
+                    <div class="row">
+                        <div class="col-6 temp">
+                            <figure class="image is-50x50">
+                                <img src="http://openweathermap.org/img/w/{{ forecast.icon }}.png" alt="Temperature Icon" id="img_icon">
+                            </figure>
+                            <h2 id="temp"><b>{{forecast.temperature}}°C</b></h2>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="col"><h6>Hourly Forecast</h6></div>
+                            <div class="col" id="hourly"><h5>{{forecast.hourly}}°C</h5></div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="col"><p id="wind">Wind: {{forecast.wind}}m/s</p></div>
+                            <div class="col"><p id="desc"><b>{{forecast.description}}</b> </p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="{% url 'save_forecast' %}" class="btn btn-success">Save changes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 mt-3">
+            <h2>Check your weather</h2>
+            <br />
+            {% include 'messages.html' %}
+            <form autocomplete="off">
+                <div class="form-group mt-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input 
+                                type="text"
+                                name="location"
+                                class="form-control"
+                                placeholder="Enter your location"
+                            />
+                        </div>
+                        <div class="col-md-6">
+                            <button type="submit" class="btn btn-success">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-10 mt-3">
+            <button class="btn btn-primary" id="history-button">Show historical data</button>
+        </div>
+    </div>
+    <div class='row mt-3' style="display: none;" id='history-data'>
+        {% if data.page_obj %}
+        <div class="search-input">
+            <div class="form-group">
+                <input type="text" class="form-control" id="searchField" placeholder="Search">
+            </div>
+        </div>
+        <div id="app-table">
+            <table class="table table-striped">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Location</th>
+                            <th>Temperature</th>
+                            <th>Humidity</th>
+                            <th>Wind</th>
+                            <th>Description</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for obj in data.page_obj %}
+                        <tr>
+                            <td>{{obj.location}}</td>
+                            <td>{{obj.temperature}} °C</td>
+                            <td>{{obj.humidity}}</td>
+                            <td>{{obj.wind}}</td>
+                            <td>{{obj.description}}</td>
+                            <td>{{obj.created_date|date}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </table>
+        </div>
+        <h4 class="text-muted" id="no-results" style="display: none;">No results </h4>
+        <div id="table-output">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Location</th>
+                        <th>Temperature</th>
+                        <th>Humidity</th>
+                        <th>Wind</th>
+                        <th>Description</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    
+                </tbody>
+            </table>
+        </div>
+    
+        <div id="pagination-container">
+            <div class="">
+                Showing page {{ data.page_obj.number }} of {{ data.page_obj.paginator.num_pages }}
+            </div>
+            <ul class="pagination align-right float-right mr-auto">
+                {% if data.page_obj.has_previous %}
+                <li {% if data.page_obj.number == 1 %} class="page-item active" {% endif %}><a class="page-link" href="?page=1">&laquo; 1</a></li>
+                <li class="page-item"> <a class="page-link" href="?page={{ data.page_obj.previous_page_number }}">Previous</a></li>
+                {% endif %}
+        
+                {% if data.page_obj.has_next %}
+                <li class="page-item"> <a class="page-link" href="?page={{ data.page_obj.next_page_number }}">Next</a></li>
+                <li class="page-item"> <a class="page-link" href="?page={{ data.page_obj.paginator.num_pages }}">{{ data.page_obj.paginator.num_pages}} &raquo;</a></li>
+                {% endif %}
+            </ul>
+        </div> 
+        {% else %}
+        <h2 class="text-muted">No historical data available</h2>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}
+
+{% block javascript %}
+{% if forecast.temperature is not None %}
+<script>
+  $(window).on('load', function () {
+    $('#resultsModal').modal('show')
+  })
+</script>
+{% endif %}
+<script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'js/search.js' %}"></script>
+{% endblock javascript %}
