@@ -1,4 +1,12 @@
-# Weather Forecast - built with Django
+# Weather Forecast 
+
+#### Framework
+Built with Django. 
+
+#### Libraries
+API Used: 
+- Openweathermap
+- Mapbox 
 
 Command To Execute on Windows:
 
